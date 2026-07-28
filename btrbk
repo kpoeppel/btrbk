@@ -5237,15 +5237,18 @@ sub sub_diff($$) {
     return 0;
   }
 
-  # NOTE: in some cases "cgen" differs from "gen", even for read-only snapshots (observed: gen=cgen+1)
-  my $lastgen = $src_vol->{node}{gen} + 1;
+  # Use the snapshot creation generation as the stable boundary. The
+  # reported "gen" can change after snapshot creation (and can even be the
+  # same for several read-only snapshots), which would make find-new return
+  # an empty result and disable --progress-total.
+  my $lastgen = $src_vol->{node}{cgen} + 1;
 
   # dump files, sorted and unique
   my $ret = btrfs_subvolume_find_new($target_vol, $lastgen);
   
-  INFO "Listing changed files for subvolume: $target_vol->{PRINT}  (gen=$target_vol->{node}{gen})";
-  INFO "Starting at generation after subvolume: $src_vol->{PRINT}  (gen=$src_vol->{node}{gen})";
-  INFO "Listing files modified within generation range: [$lastgen..$target_vol->{node}{gen}]";
+  INFO "Listing changed files for subvolume: $target_vol->{PRINT}  (cgen=$target_vol->{node}{cgen})";
+  INFO "Starting at generation after subvolume: $src_vol->{PRINT}  (cgen=$src_vol->{node}{cgen})";
+  INFO "Listing files modified within generation range: [$lastgen..$target_vol->{node}{cgen}]";
   DEBUG "Newest file generation (transid marker) was: $ret->{transid_marker}";
   my $files = $ret->{files};
   my $total_len = 0;
@@ -5628,16 +5631,18 @@ MAIN:
     my $src_vol = $subvol_args[0];
     my $target_vol = $subvol_args[1];
 
-    # NOTE: in some cases "cgen" differs from "gen", even for read-only snapshots (observed: gen=cgen+1)
-    my $lastgen = $src_vol->{node}{gen} + 1;
+    # Use the snapshot creation generation as the stable boundary. The
+    # reported "gen" can change after snapshot creation (and can even be the
+    # same for several read-only snapshots).
+    my $lastgen = $src_vol->{node}{cgen} + 1;
 
     # dump files, sorted and unique
     my $ret = btrfs_subvolume_find_new($target_vol, $lastgen);
     exit 1 unless(ref($ret));
 
-    INFO "Listing changed files for subvolume: $target_vol->{PRINT}  (gen=$target_vol->{node}{gen})";
-    INFO "Starting at generation after subvolume: $src_vol->{PRINT}  (gen=$src_vol->{node}{gen})";
-    INFO "Listing files modified within generation range: [$lastgen..$target_vol->{node}{gen}]";
+    INFO "Listing changed files for subvolume: $target_vol->{PRINT}  (cgen=$target_vol->{node}{cgen})";
+    INFO "Starting at generation after subvolume: $src_vol->{PRINT}  (cgen=$src_vol->{node}{cgen})";
+    INFO "Listing files modified within generation range: [$lastgen..$target_vol->{node}{cgen}]";
     DEBUG "Newest file generation (transid marker) was: $ret->{transid_marker}";
 
     my $files = $ret->{files};
