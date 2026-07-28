@@ -6023,7 +6023,7 @@ MAIN:
 
 
   #
-  # create vinfo nodes (no readin yet)
+  # create vinfo nodes (no read in yet)
   #
   foreach my $config_vol (config_subsection($config, "volume")) {
     my $sroot = $config_vol->{DUMMY} ? { CONFIG => $config_vol, PRINT => "*default*" } : vinfo($config_vol->{url}, $config_vol);
@@ -6382,7 +6382,7 @@ MAIN:
   if($action_run && $skip_backups && $preserve_snapshots && $preserve_backups) {
     # if running "btrbk snapshot --preserve", there is no need to
     # initialize targets, and we don't want to fail on missing targets.
-    DEBUG "Skipping target tree readin (preserving all snapshots and backups)";
+    DEBUG "Skipping target tree read in (preserving all snapshots and backups)";
   }
   else {
     foreach my $sroot (vinfo_subsection($config, 'volume')) {
